@@ -94,6 +94,6 @@ Build and run with Docker Compose:
 docker compose up --build -d
 ```
 
-App is available at [http://localhost:3200](http://localhost:3200).
+App is available at [http://localhost:3000](http://localhost:3000).
 
 The container runs as a non-root user on port 3000 internally, mapped to host port 3200. It uses Next.js [standalone output](https://nextjs.org/docs/app/api-reference/config/next-config-js/output) for a minimal production image.

@@ -1,7 +1,7 @@
 # Bug Reports — Booking Flow
 
 **Application:** Waste Skip Hire Booking Flow
-**Environment:** Chrome 124, Windows 11 / macOS 14, localhost:3200
+**Environment:** Chrome 124, Windows 11 / macOS 14, localhost:3000
 
 ---
 
@@ -13,7 +13,7 @@
 | **Title** | Wrong font color of manualy entered address |
 | **Severity** | Medium |
 | **Priority** | P1|
-| **Environment** | Chrome, Windows, localhost:3200 |
+| **Environment** | Chrome, Windows, localhost:3000 |
 
 **Preconditions:**
 -
@@ -40,7 +40,7 @@ Etrered text has garay font color.
 | **Title** | The system allow user to proceed booking without post code|
 | **Severity** | Critical  |
 | **Priority** | P1 |
-| **Environment** | Chrome, Windows, localhost:3200 |
+| **Environment** | Chrome, Windows, localhost:3000 |
 
 **Preconditions:**
 - post code field is empry 
@@ -70,7 +70,7 @@ There is error message on page Skip Size selection step:
 | **Title** | Review step shows post code in wrong format |
 | **Severity** | Medium 
 | **Priority** | P1 |
-| **Environment** | Chrome, Windows, localhost:3200 |
+| **Environment** | Chrome, Windows, localhost:3000 |
 
 **Preconditions:**
 - App loaded, step 1 visible
@@ -99,7 +99,7 @@ Same situation in case postcode has been enterd w/o spase SW1a1aa
 | **Title** | The system allows user to book collection w/o selection of waste type and size |
 | **Severity** | Critical |
 | **Priority** | P1 |
-| **Environment** | Browser, OS, localhost:3200 |
+| **Environment** | Browser, OS, localhost:3000 |
 
 **Preconditions:**
 - App loaded, step 1 visible
@@ -131,7 +131,7 @@ The error message comes up.
 | **Title** | Wrong alligment of elements in case page opend on Samsung Galaxy S8+ |
 | **Severity** | Medium |
 | **Priority** | P3 |
-| **Environment** | Chrome, Android, localhost:3200 |
+| **Environment** | Chrome, Android, localhost:3000 |
 
 **Preconditions:**
 -
