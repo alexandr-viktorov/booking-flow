@@ -1,5 +1,6 @@
 import { type Page, type Locator } from '@playwright/test';
 import { WasteType } from './WasteType';
+import { PlasterboardOption } from './PlasterboardOption';
 
 export class WasteTypePage {
   readonly page: Page;
@@ -10,6 +11,7 @@ export class WasteTypePage {
   readonly continueButton: Locator;
   readonly backButton: Locator;
   readonly postcodeStepIndicator: Locator;
+  readonly plasterboardHandlingMethod: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -20,14 +22,23 @@ export class WasteTypePage {
     this.continueButton = page.getByTestId('step2-next-button');
     this.backButton = page.getByRole('button', { name: 'Back' });
     this.postcodeStepIndicator = page.getByRole('button', { name: /✓.*Postcode/ });
+    this.plasterboardHandlingMethod = page.getByTestId('plasterboard-options');
   }
 
   async  selectWasteType(testId: WasteType): Promise<void> {
     await this.page.getByTestId(testId).click();
   }
 
+  async  selectPlasterboardHandlingMethod(testId: PlasterboardOption): Promise<void> {
+    await this.page.getByTestId(testId).click();
+  }
+
   async getOptionByWatesteType(wasteType: WasteType): Promise<Locator> {
     return this.page.getByTestId(wasteType);
+  }
+
+   async getPlasterboardHandlingMethodByType(PlasterboardType: PlasterboardOption): Promise<Locator> {
+    return this.page.getByTestId(PlasterboardType);
   }
 
   async continue(): Promise<void> {

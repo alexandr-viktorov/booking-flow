@@ -11,6 +11,7 @@ export class ReviewPage {
   readonly priceBreakdown: Locator;
   readonly priceSkipHire: Locator;
   readonly priceHeavySurcharge: Locator;
+  readonly pricePlasterboardSurcharge: Locator;
   readonly priceTotal: Locator;
   readonly confirmButton: Locator;
   readonly backButton: Locator;
@@ -27,6 +28,7 @@ export class ReviewPage {
     this.priceBreakdown = page.getByTestId('price-breakdown');
     this.priceSkipHire = page.getByTestId('price-skip-hire').locator('..');
     this.priceHeavySurcharge = page.getByTestId('price-heavy-surcharge').locator('..');
+    this.pricePlasterboardSurcharge = page.getByTestId('price-plasterboard-surcharge').locator('..');
     this.priceTotal = page.getByTestId('price-total');
     this.confirmButton = page.getByTestId('confirm-button');
     this.backButton = page.getByRole('button', { name: 'Back' });
