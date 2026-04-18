@@ -84,7 +84,24 @@ lib/
   fixtures/         # Mock data for addresses and skips
   types.ts          # Shared TypeScript interfaces
   validators/       # UK postcode validation
+automation/
+  e2e/              # Playwright E2E test specs
+  pages/            # Page Object Models (POM) per step
+  fixtures.ts       # Custom test fixtures wiring page objects
+  seed.spec.ts      # Seed file for test setup
 ```
+
+## E2E Tests
+
+Tests live under `automation/` and use the Page Object Model pattern. Each booking flow variant has its own spec:
+
+| Spec | Flow |
+|------|------|
+| `e2e/heavy-waste-booking-flow.spec.ts` | Heavy waste → 6-yard skip (£160 + £20 surcharge) |
+| `e2e/general-waste-booking-flow.spec.ts` | General waste → 4-yard skip (£120, no surcharge) |
+| `e2e/plasterboard-waste-booking-flow.spec.ts` | Plasterboard (mixed) → 4-yard skip (£120 + £40 surcharge) |
+
+Page objects are in `automation/pages/` with one class per wizard step. Enums (`WasteType`, `SkipSize`, `PlasterboardOption`) map human-readable names to `data-testid` values used in the app.
 
 ## Docker
 
