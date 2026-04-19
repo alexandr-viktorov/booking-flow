@@ -97,6 +97,17 @@ automation/
   seed.spec.ts      # Seed file for test setup
 ```
 
+## QA Artefacts
+
+| File / Folder | Description |
+|---|---|
+| `manual-tests.md` | 40 manual test cases covering positive, negative, edge, API failure, and state transition scenarios across all 4 wizard steps |
+| `bug-reports.md` | 5 bug reports found during exploratory testing, each with steps to reproduce, expected/actual results, and a screenshot |
+| `ui/Flow video.mp4` | Screen recording of a full end-to-end booking flow |
+| `ui/Screenshots/Desktop/` | Step-by-step desktop screenshots (001–009) |
+| `ui/Screenshots/Mobile/` | Step-by-step mobile screenshots on Samsung Galaxy S8+ (101–109) |
+| `ui/lighthouse-accessibility-report.html` | Lighthouse accessibility audit report |
+
 ## E2E Tests
 
 Tests live under `automation/` and use the Page Object Model pattern. Each booking flow variant has its own spec:
