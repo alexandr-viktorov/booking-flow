@@ -71,23 +71,25 @@ npx playwright test path/to/test.spec.ts    # Run a specific test file
 
 ```
 app/
-  api/              # API route handlers
-  booking/          # Booking wizard page
+  api/              # API route handlers (postcode, waste-types, skips, booking/confirm)
+  booking/          # Booking wizard page (single 'use client' page, all 4 steps)
   globals.css       # Global styles
   layout.tsx        # Root layout
 components/
   steps/            # PostcodeStep, WasteTypeStep, SkipStep, ReviewStep
   ui/               # LoadingState, ErrorState, EmptyState, ProgressBar
 hooks/
-  useBookingStore.ts  # Wizard state management
+  useBookingStore.ts  # Wizard state — use setWasteType() (not update()) to reset downstream state
 lib/
-  fixtures/         # Mock data for addresses and skips
+  fixtures/         # In-memory mock data: addresses.ts, skips.ts
   types.ts          # Shared TypeScript interfaces
   validators/       # UK postcode validation
 automation/
-  e2e/              # Playwright E2E test specs
-  pages/            # Page Object Models (POM) per step
-  fixtures.ts       # Custom test fixtures wiring page objects
+  e2e/              # Playwright E2E test specs (one file per booking flow variant)
+  pages/            # Page Object Models per wizard step; enums (WasteType, SkipSize, PlasterboardOption) colocated here
+  test-data/
+    test-data.ts    # BookingScenario objects — single source of truth for all test data
+  fixtures.ts       # Extends Playwright test to inject page objects
   seed.spec.ts      # Seed file for test setup
 ```
 
@@ -102,6 +104,45 @@ Tests live under `automation/` and use the Page Object Model pattern. Each booki
 | `e2e/plasterboard-waste-booking-flow.spec.ts` | Plasterboard (mixed) → 4-yard skip (£120 + £40 surcharge) |
 
 Page objects are in `automation/pages/` with one class per wizard step. Enums (`WasteType`, `SkipSize`, `PlasterboardOption`) map human-readable names to `data-testid` values used in the app.
+
+## E2E Test Data Strategy
+
+All test data is centralised in `automation/test-data/test-data.ts` as typed scenario objects. Each spec imports one scenario and aliases it `testData`, keeping assertions readable without repeating literals.
+
+### Structure
+
+**One interface, three scenarios:**
+```ts
+interface BookingScenario {
+  postcode, address, addressSummary   // postcode step
+  wasteType, wasteTypeSummaryText     // waste type step
+  plasterboardOption?                 // plasterboard step (optional)
+  skipSize, skipSizeSummaryText,
+  skipSizeDisplayPrice                // skip step
+  price: { hire, heavySurcharge?,
+    plasterboardSurcharge?, total }   // review step
+  selectedClass: RegExp               // shared UI selection state
+  selectedPlasterboardClass?: RegExp  // plasterboard-specific selection state
+}
+```
+
+**Optional fields signal "not applicable"** — `heavySurcharge?` being absent on `generalWasteScenario` directly maps to `not.toBeVisible()` in the spec. `plasterboardOption?` only exists on the plasterboard scenario, so the non-null assertion `testData.plasterboardOption!` in that spec is always safe.
+
+### What each spec owns
+
+| Concern | In test-data | In spec |
+|---|---|---|
+| All string values, prices, enums | ✓ | |
+| CSS selection classes | ✓ | |
+| App behaviour (e.g. 2-yard/4-yard disabled for heavy waste) | | ✓ hardcoded |
+| `not.toBeVisible()` surcharge assertions | | ✓ hardcoded |
+| Step logic and flow order | | ✓ |
+
+App behaviour assertions (disabled skips, absent surcharges) stay hardcoded in specs because they test how the app responds to the scenario — they're not data points of the scenario itself.
+
+### Why named objects over `test.each`
+
+The three flows differ structurally — plasterboard has an extra handling-method step, general waste has `not.toBeVisible()` assertions the others don't. Forcing them into a single parameterised table would require conditional logic inside the test body, making failures harder to diagnose. Separate specs with shared data objects give the same "one source of truth" benefit without merging structurally different flows.
 
 ## Docker
 

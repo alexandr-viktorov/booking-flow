@@ -53,3 +53,31 @@ This is a Next.js **16.2.4** app (non-standard version — APIs may differ from 
 - Folders define URL segments; a route is only public when a `page.tsx` or `route.ts` exists.
 - Use `(group)` folders for organization without affecting URLs.
 - Use `_folder` prefix for non-routable colocated files (components, utils, etc.).
+
+## Booking flow
+
+The entire UI lives at `/booking` (`app/booking/page.tsx`), which is a single `'use client'` page that renders one of four step components based on `state.currentStep`. There is no multi-page routing between steps.
+
+**State** is managed entirely in `hooks/useBookingStore.ts` via `useState`. The store is not persisted. `setWasteType()` must be used (not `update()`) when changing waste type — it resets downstream skip and plasterboard state as a side effect.
+
+**Step flow**: PostcodeStep (1) → WasteTypeStep (2) → SkipStep (3) → ReviewStep (4). ReviewStep calls `/api/booking/confirm` and on success renders a confirmation panel inline (no navigation).
+
+**API routes** (`app/api/`) are thin handlers backed by in-memory fixture data in `lib/fixtures/`:
+- `postcode/lookup` — returns addresses from `lib/fixtures/addresses.ts`
+- `skips` — calls `getSkips(heavyWaste)` from `lib/fixtures/skips.ts`; disables 2-yard and 4-yard skips when `heavyWaste: true`
+- `waste-types` — accepts waste type selection
+- `booking/confirm` — generates a `BK-XXXX` booking ID
+
+**Pricing** is applied in ReviewStep, not in the API. Surcharges: heavy waste +£20, plasterboard (mixed) +£40.
+
+## E2E automation
+
+Tests live in `automation/e2e/`. The automation layer uses the Page Object Model:
+- **Page objects** in `automation/pages/` wrap locators and actions for each step
+- **Fixtures** in `automation/fixtures.ts` extend Playwright's `test` to inject page objects — import `{ test, expect }` from `../fixtures`, not from `@playwright/test`
+- **Test data** is in `automation/test-data.ts` — `BookingScenario` objects (`generalWasteScenario`, `heavyWasteScenario`, `plasterboardScenario`) centralise all hardcoded strings and prices used across specs. Import with a short alias: `import { generalWasteScenario as d } from '../test-data'`
+- **Enums** for waste type, skip size, and plasterboard option live under `automation/pages/` alongside the page objects that use them
+
+> **Note**: there is a duplicate `automation/test-data/test-data.ts` (subdirectory). The canonical file is `automation/test-data.ts` (root of `automation/`). The subdirectory version should be removed.
+
+All specs use `test.step()` for every logical action, with the step description matching the action (no numbering prefix).
