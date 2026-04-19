@@ -66,11 +66,13 @@ export function SkipStep({ state, onUpdate, onNext, onBack }: Props) {
       {status === "loading" && <LoadingState lines={6} />}
 
       {status === "error" && (
-        <ErrorState
-          message={errorMessage}
-          onRetry={fetchSkips}
-          testId="skip-error-state"
-        />
+        <div className="mb-8">
+          <ErrorState
+            message={errorMessage}
+            onRetry={fetchSkips}
+            testId="skip-error-state"
+          />
+        </div>
       )}
 
       {status === "success" && (
