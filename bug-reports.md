@@ -28,7 +28,7 @@ The entered text should be in black color.
 **Actual:**
 Etrered text has garay font color.
 
-**Evidence:** `ui/bug-001.png`
+**Evidence:** ![BUG-001](ui/bug-001.png)
 
 ---
 
@@ -58,7 +58,7 @@ There is error message on page Skip Size selection step:
     Something went wrong
     Server error 400
 
-**Evidence:** `ui/bug-002.png`
+**Evidence:** ![BUG-002](ui/bug-002.png)
 
 ---
 
@@ -87,7 +87,7 @@ Review step shows post code in Upper case in corect for UK postcode format.
 Review step shows post code in lower case. 
 Same situation in case postcode has been enterd w/o spase SW1a1aa
 
-**Evidence:** `ui/bug-003.png`
+**Evidence:** ![BUG-003](ui/bug-003.png)
 
 ---
 
@@ -119,7 +119,7 @@ The error message comes up.
     Something went wrong
     Server error 422
 
-**Evidence:** `ui/bug-004.png`
+**Evidence:** ![BUG-004](ui/bug-004.png)
 
 ---
 
@@ -145,6 +145,6 @@ Page should shown correctly alignet elements
 **Actual:**
 Wrong alligment of elements in case page opend on Samsung Galaxy S8+
 
-**Evidence:** `ui/bug-005.png`
+**Evidence:** ![BUG-005](ui/bug-005.png)
 
 ---
