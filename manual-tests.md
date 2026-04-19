@@ -9,6 +9,112 @@
 
 ---
 
+## Mocking Strategy for API Failure Tests
+
+Four test cases require the server to return an error: **TC-009**, **TC-010**, **TC-025**, and **TC-033**. Each uses a different technique depending on whether the failure is built into the server fixtures or must be induced via the browser.
+
+---
+
+### Which technique applies to which test
+
+| Test | Endpoint | Failure type | Technique |
+|------|----------|--------------|-----------|
+| TC-009 | `POST /api/postcode/lookup` | 500 on first attempt, 200 on retry | Built-in fixture — use postcode `BS1 4DJ`, no setup needed |
+| TC-010 | `POST /api/postcode/lookup` | Network unreachable | DevTools → Network offline mode |
+| TC-025 | `GET /api/skips` | 500 response | DevTools → Override content |
+| TC-033 | `POST /api/booking/confirm` | 500 response | DevTools → Override content |
+
+---
+
+### Technique A — Built-in server fixture (TC-009)
+
+No browser setup is required. The server already handles `BS1 4DJ` specially:
+
+- **First call** → returns `500 Internal server error`
+- **Second call** → returns `200` with address results
+
+Simply enter `BS1 4DJ` as the postcode and follow the TC-009 steps. The retry counter resets automatically after a successful retry, so the test is repeatable without restarting the server.
+
+> **Note:** The counter is per-process and resets on server restart. If something interrupted a previous test mid-retry, restart the app (`docker compose restart app`) to reset the counter.
+
+---
+
+### Technique B — DevTools network offline (TC-010)
+
+This simulates a complete loss of network connectivity, causing `fetch()` to throw a network error rather than receiving any HTTP response.
+
+**Setup:**
+
+1. Open DevTools (`F12`) → **Network** tab
+2. Find the **"No throttling"** dropdown at the top of the Network tab
+3. Select **"Offline"** from the dropdown
+
+**Teardown:**
+
+After the test, set the dropdown back to **"No throttling"** (or "Online"). The app will resume making real requests immediately — no page reload needed.
+
+> Offline mode blocks all network traffic for the tab, including browser navigation. Keep DevTools open and restore the setting as soon as the test is complete.
+
+---
+
+### Technique C — DevTools override content (TC-025, TC-033)
+
+This is the recommended technique for forcing a specific HTTP status code (500) on a single endpoint while leaving all other requests unaffected.
+
+Chrome's **"Override content"** feature intercepts a matched request and serves a locally edited response instead.
+
+#### One-time setup (first time only)
+
+1. Open DevTools (`F12`) → **Sources** tab → **Overrides** panel (left sidebar)
+2. Click **"Select folder for overrides"**
+3. Choose any local folder (e.g. `Desktop/devtools-overrides`)
+4. Click **"Allow"** when Chrome asks for filesystem access
+5. Check **"Enable Local Overrides"** if the checkbox appears
+
+#### Creating an override for `/api/skips` (TC-025)
+
+1. Navigate to Step 3 normally (complete steps 1–2 first) so Chrome records a `/api/skips` request
+2. In the **Network** tab, find the `skips` request
+3. Right-click it → **"Override content"**
+4. Chrome opens the response body in the Sources editor
+5. Replace the entire file content with:
+   ```json
+   {"error":"Internal Server Error"}
+   ```
+6. In the file header inside the Sources editor, change the **status code** to `500`  
+   *(If the editor does not expose the status directly, use the Headers override: right-click the request → "Override headers", add `status: 500`)*
+7. Save with `Ctrl+S`
+
+The override is now active. Reload Step 3 to trigger a fresh fetch — the browser will serve your override instead of the real response.
+
+#### Creating an override for `/api/booking/confirm` (TC-033)
+
+Follow the same steps as above, but trigger the override after clicking "Confirm booking" on Step 4 so Chrome records the `confirm` request first:
+
+1. Complete the full flow through to the Review step
+2. Click **"Confirm booking"** once to make Chrome record the `confirm` request
+3. Right-click the `confirm` request in the Network tab → **"Override content"**
+4. Replace the body with `{"error":"Internal Server Error"}` and set status to `500`
+5. Save — click **"Confirm booking"** again to observe the error state
+
+#### Disabling an override after the test
+
+- In the **Sources → Overrides** panel, uncheck the override file or uncheck **"Enable Local Overrides"**
+- Or right-click the request in Network → **"Stop overriding"**
+- Always disable overrides before moving to the next test case
+
+> Overrides persist across page reloads and browser restarts until explicitly disabled. Always check the Overrides panel is clear before starting an unrelated test.
+
+---
+
+### Quick checklist before each API failure test
+
+- [ ] Previous test's DevTools setup has been torn down (overrides off, online mode restored)
+- [ ] Server is running and healthy (`http://localhost:3000` loads)
+- [ ] For TC-009: no previous incomplete run has left the retry counter in an unexpected state — if unsure, restart the container
+
+---
+
 ## Legend
 
 | Tag | Meaning |
