@@ -33,26 +33,30 @@ A 4-step booking wizard that guides users through selecting a skip for waste rem
 
 ```bash
 npm install
-npm run dev
 ```
-
-App runs at [http://localhost:3000](http://localhost:3000).
 
 ### Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:3000` | Base URL for API calls from the client |
+| `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:3000` | Base URL for API calls from the client bundle |
+| `BASE_URL` | `http://localhost:3000` | Base URL used server-side (e.g. Playwright, SSR fetches) |
 
 Create a `.env.local` file at the project root to override defaults.
+
+## Docker
+
+Build and run with Docker Compose:
+
+```bash
+docker compose up --build -d
+```
+
+App runs at [http://localhost:3000](http://localhost:3000).
 
 ## Commands
 
 ```bash
-npm run dev        # Start development server
-npm run build      # Production build
-npm run lint       # Run ESLint
-
 npx playwright test                         # Run all E2E tests
 npx playwright test --grep "test name"      # Run a single test by name
 npx playwright test path/to/test.spec.ts    # Run a specific test file
@@ -105,6 +109,18 @@ Tests live under `automation/` and use the Page Object Model pattern. Each booki
 
 Page objects are in `automation/pages/` with one class per wizard step. Enums (`WasteType`, `SkipSize`, `PlasterboardOption`) map human-readable names to `data-testid` values used in the app.
 
+## Mocking Approach
+
+There is no mocking in this project — E2E tests run against the real Next.js app with its real API routes and in-memory fixture data.
+
+The API routes (`/api/postcode/lookup`, `/api/skips`, etc.) are backed by `lib/fixtures/` — static data hardcoded on the server. From the test's perspective this behaves like a real backend: the browser makes actual HTTP requests, the server processes them, and the UI renders real responses.
+
+- **No network interception** — Playwright does not stub or intercept any requests
+- **No database mocks** — there is no database; fixture files *are* the data layer
+- **Test data in `test-data.ts` must match fixture data** — e.g. `skipSizeDisplayPrice: '£160'` for the 6-yard skip works because `lib/fixtures/skips.ts` has `{ size: "6-yard", price: 160 }`. If a fixture changes, the corresponding scenario value must be updated too
+
+Tests are more realistic (they catch real rendering and API integration issues) but will break if fixture data changes. For this scale of app — a single wizard with static data — it's the right tradeoff.
+
 ## E2E Test Data Strategy
 
 All test data is centralised in `automation/test-data/test-data.ts` as typed scenario objects. Each spec imports one scenario and aliases it `testData`, keeping assertions readable without repeating literals.
@@ -143,15 +159,3 @@ App behaviour assertions (disabled skips, absent surcharges) stay hardcoded in s
 ### Why named objects over `test.each`
 
 The three flows differ structurally — plasterboard has an extra handling-method step, general waste has `not.toBeVisible()` assertions the others don't. Forcing them into a single parameterised table would require conditional logic inside the test body, making failures harder to diagnose. Separate specs with shared data objects give the same "one source of truth" benefit without merging structurally different flows.
-
-## Docker
-
-Build and run with Docker Compose:
-
-```bash
-docker compose up --build -d
-```
-
-App is available at [http://localhost:3000](http://localhost:3000).
-
-The container runs as a non-root user on port 3000 internally, mapped to host port 3200. It uses Next.js [standalone output](https://nextjs.org/docs/app/api-reference/config/next-config-js/output) for a minimal production image.
